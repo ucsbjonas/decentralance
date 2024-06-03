@@ -13,22 +13,27 @@ contract UserFlowTest is Test {
     address contractor = address(0x10);
     address client = address(0x11);
 
+    uint256[] public amounts;
+    uint256[] public delivery_dates;
 
     function setUp() public {
         vm.deal(contractor, 100 ether);
         vm.deal(client, 100 ether);
 
         marketPlace = new MarketPlace();
+
     }
 
     function test_UserFlow1() public {
     // a basic (expected, non-malicious, normal) user flow
+    amounts.push(1 ether);
+    amounts.push(5 ether);
+    delivery_dates.push(block.timestamp + 100);
+    delivery_dates.push(block.timestamp + 250);
 
     // 1. client makes a listing request
     vm.startBroadcast(client);
 
-    uint256[2] memory amounts = [uint256(1 ether), uint256(5 ether)];
-    uint256[2] memory delivery_dates = [block.timestamp + 100, block.timestamp + 250];
 
     new_listing = new Listing(msg.sender, 
                             amounts,

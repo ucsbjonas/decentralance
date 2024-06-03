@@ -4,9 +4,9 @@ pragma solidity ^0.8.13;
 contract Listing {
     //storage variables
     address public client;
-    uint256[2] public amounts; // [totalAmount, partialAmount]
+    uint256[] public amounts; // [totalAmount, partialAmount]
     //make it size 2 for now, not sure about workaround for dynamic sized arrays
-    uint256[2] public delivery_dates; // [finalDeliveryDate, intermediateDeliveryDate]
+    uint256[] public delivery_dates; // [finalDeliveryDate, intermediateDeliveryDate]
     string public description;
     address public contractor;
     bool public accepted;
@@ -14,7 +14,7 @@ contract Listing {
     uint256 public curr_stage; // 0 for not started, 1 for intermediate, 2 for final
 
     //constructor
-    constructor(address _client, uint256[2] memory initial_amounts, uint256[2] memory initial_delivery_dates, string memory initial_description) {
+    constructor(address _client, uint256[] memory initial_amounts, uint256[] memory initial_delivery_dates, string memory initial_description) {
         client = _client;
         amounts = initial_amounts;
         delivery_dates = initial_delivery_dates;
