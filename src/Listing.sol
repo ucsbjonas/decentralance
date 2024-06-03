@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-struct ListingTerms {
-    address addr;
-    uint amount;
-}
-
 contract Listing{
 
-//state variables
+
+//storage variables
+address public client;
+uint256[2] public amounts; //make it size 2 for now, not sure about workaround for dynammic sized arrays
+uint256[2] public delivery_dates;
+string public description;
+address public contractor;
+bool public accepted;
+bool public fulfilled;
+uint256 public curr_stage;
 
 //constructor
+constructor(address _client, uint256[2] memory initial_amounts, uint256[2] memory initial_delivery_dates, string memory initial_description){
+
+}
 
 }
