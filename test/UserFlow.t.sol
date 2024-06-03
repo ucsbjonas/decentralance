@@ -117,28 +117,28 @@ contract UserFlowTest is Test {
     vm.startBroadcast(client);
     bool success1 = marketPlace.pay_current_stage(listing_id);
     assertEq(success1, true, "failed to pay current stage");
-    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "did not move to next stage");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should not move to next stage");
     vm.stopBroadcast();
 
     // 5a. contractor send partial fufillment of listing
     vm.startBroadcast(contractor);
     bool success = marketPlace.fufill_current_stage(listing_id);
     assertEq(success, true, "failed to fulfill current stage");
-    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "should not move to next stage");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "did not move to next stage");
     vm.stopBroadcast();
 
     // 4b. client sends partial payment of listing
     vm.startBroadcast(client);
     bool success3 = marketPlace.pay_current_stage(listing_id);
     assertEq(success3, true, "failed to pay current stage");
-    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "did not move to next stage");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "should not move to next stage");
     vm.stopBroadcast();
 
     // 5b. contractor send partial fufillment of listing
     vm.startBroadcast(contractor);
     bool success2 = marketPlace.fufill_current_stage(listing_id);
     assertEq(success2, true, "failed to fulfill current stage");
-    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 2, "should not move to next stage");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 2, "did not move to next stage");
     assertEq(marketPlace.listing_lookup(listing_id).fulfilled(), true, "not fulfilled");
     vm.stopBroadcast();
 
