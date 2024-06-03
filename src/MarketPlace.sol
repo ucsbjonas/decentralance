@@ -13,7 +13,6 @@ contract MarketPlace{
 
     function addListing(Listing new_listing) public returns (uint256) {}
     function acceptListing(uint256 listing_id) public {}
-    function confirmListing(uint256 listing_id) public {}
     function fufill_current_stage(uint256 listing_id) public returns (bool) {}
     function pay_current_stage(uint256 listing_id) public returns (bool) {}
     function listing_lookup(uint256 _listing_id) public view returns (Listing) {return listings[_listing_id];}
