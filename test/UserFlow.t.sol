@@ -24,6 +24,7 @@ contract UserFlowTest is Test {
     // a basic (expected, non-malicious, normal) user flow (client initiated)
     function test_UserFlow_clientinitiated() public {
 
+    // 1. client makes a listing request
     vm.startBroadcast(client);
 
     uint256[2] memory amounts = [uint256(1 ether), uint256(5 ether)];
@@ -35,21 +36,21 @@ contract UserFlowTest is Test {
                             "a comission for you");
     uint256 listing_id = marketPlace.addListing(new_listing);
     assertEq(marketPlace.listing_lookup(listing_id).client_initiated(), true);
-    // 1. client makes a listing request
 
     vm.stopBroadcast();
-    // 2. contractor accepts listing and defines terms
+    // 2. contractor accepts listing, and is added to a list (mapping) of contractors
     vm.startBroadcast(contractor);
     marketPlace.acceptListing(listing_id);
-    assertEq(marketPlace.listing_lookup(listing_id).contractor(), address(contractor), "wrong contractor");
+    assertEq(marketPlace.listing_lookup(listing_id).isContractor(address(contractor)), true, "contractor not added");
     vm.stopBroadcast();
 
-    // 3. client accepts terms
-    // vm.startBroadcast(client);
-    // marketPlace.confirmListing(listing_id);
-    // assertEq(marketPlace.listing_lookup(listing_id).accepted(), true, "not accepted");
-    // assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should start at stage 0");
-    // vm.stopBroadcast();
+    // 3. client confirms, and chooses a contractor to work with
+    vm.startBroadcast(client);
+    marketPlace.confirmListing(listing_id, address(contractor));
+    assertEq(marketPlace.listing_lookup(listing_id).confirmed(), true, "not confirmed");
+    assertEq(marketPlace.listing_lookup(listing_id).contractor(), address(contractor), "wrong contractor");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should start at stage 0");
+    vm.stopBroadcast();
 
     // 4a. contractor sends partial fufillment of listing
     vm.startBroadcast(contractor);
@@ -86,7 +87,7 @@ contract UserFlowTest is Test {
     
     vm.startBroadcast(contractor);
 
-    // 1. contracotr makes a listing request
+    // 1. contracotr makes a listing
     uint256[2] memory amounts = [uint256(1 ether), uint256(5 ether)];
     uint256[2] memory delivery_dates = [block.timestamp + 100, block.timestamp + 250];
 
@@ -98,18 +99,19 @@ contract UserFlowTest is Test {
     assertEq(marketPlace.listing_lookup(listing_id).client_initiated(), false);
 
     vm.stopBroadcast();
-    // 2. client accepts listing
+    // 2. client accepts listing, and is added to a list (mapping) of clients
     vm.startBroadcast(client);
     marketPlace.acceptListing(listing_id);
-    assertEq(marketPlace.listing_lookup(listing_id).client(), address(client), "wrong client");
+    assertEq(marketPlace.listing_lookup(listing_id).isClient(address(client)), true, "client not added");
     vm.stopBroadcast();
 
-    // 3. contractor accepts terms
-    // vm.startBroadcast(contractor);
-    // marketPlace.confirmListing(listing_id);
-    // assertEq(marketPlace.listing_lookup(listing_id).accepted(), true, "not accepted");
-    // assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should start at stage 0");
-    // vm.stopBroadcast();
+    // 3. contractor accepts terms and chooses a client
+    vm.startBroadcast(contractor);
+    marketPlace.confirmListing(listing_id);
+    assertEq(marketPlace.listing_lookup(listing_id).confirmed(), true, "not confirmed");
+    assertEq(marketPlace.listing_lookup(listing_id).client(), address(client), "wrong client");
+    assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should start at stage 0");
+    vm.stopBroadcast();
 
     // 4a. client sends partial payment of listing
     vm.startBroadcast(client);
@@ -141,102 +143,5 @@ contract UserFlowTest is Test {
     vm.stopBroadcast();
 
     }
-
-    function test_invalid_delivery_dates() public{
-
-
-
-    }
-    function test_extend_delivery_dates() public {
-
-
-
-    }
-    function test_overpayment() public{
-
-
-
-    }
-    function test_underpayment() public {
-
-
-
-    }
-    function test_downpayment() public {
-
-
-
-    }    
-    function test_deletelisting() public {
-
-
-
-    }
-    function test_transferlisting() public {
-
-
-
-    }
-    function test_contractor_attributeupdate_fufill() public {
-
-
-
-    }
-    function test_client_attributeupdate_fullpayment() public {
-
-
-
-    }
-    function test_contractor_abandonment() public {
-
-
-
-    }
-    function test_client_abandonment() public {
-
-
-
-    }
-    function test_listing_immutables() public {
-
-
-
-    }
-    function test_wrong_client() public {
-
-
-
-    }
-    function test_wrong_contractor() public {
-
-
-
-    }
-    function test_no_ethtransfer_toMarketPlace () public {
-
-
-
-    }
-    function test_no_ethtransfer_Listing() public {
-
-
-
-    }
-    //test the last two specifications (the others are implied)
-    // Items purchased by a buyer can be put on sell again.
-    function test_cancel_listing() public{
-
-
-
-    }
-    // Within the same block, if one or more buyers pay for the same item, the one who pays more will eventually own it.
-    function test_same_block() public{
-
-
-
-    }
-
-
-
 
 }
