@@ -21,7 +21,27 @@ contract Listing {
         accepted = false;
         fulfilled = false;
         curr_stage = 0;
-
     }
 
+    //functions
+    function acceptListing(address _contractor) public {   
+        require(msg.sender == client, "only client can accept listing");
+        require(!accepted, "listing already accepted");
+        
+        contractor = _contractor;
+        accepted = true;
+        return;
+    }
+
+    function fulfill_current_stage() public {
+        return;
+    }
+
+    function pay_current_stage() public payable {
+        return;
+    }
+
+    function get_current_stage() public view returns (uint256) {
+        return curr_stage;
+    }
 }
