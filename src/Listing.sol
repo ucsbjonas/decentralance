@@ -10,7 +10,7 @@ contract Listing {
     address public contractor;
     bool public accepted;
     bool public fulfilled;
-    uint256 public curr_stage;
+    uint256 public curr_stage; // 0 for not started, 1 for intermediate, 2 for final
 
     //constructor
     constructor(address _client, uint256[2] memory initial_amounts, uint256[2] memory initial_delivery_dates, string memory initial_description) {
@@ -34,11 +34,27 @@ contract Listing {
     }
 
     function fulfill_current_stage() public {
-        return;
+        if (curr_stage == 0) {
+            curr_stage = 1;
+        } else if (curr_stage == 1) {
+            curr_stage = 2;
+            fulfilled = true;
+        }
     }
 
     function pay_current_stage() public payable {
-        return;
+        require(accepted, "listing not accepted yet");
+        require(msg.sender == client, "only client can pay");
+        require(curr_stage > 0, "no stage to pay for");
+        require(curr_stage <= 2, "all stages completed");
+
+        if (curr_stage == 1) {
+            require(msg.value == amounts[1], "incorrect payment amount for intermediate stage");
+        } else if (curr_stage == 2) {
+            require(msg.value == amounts[0] - amounts[1], "incorrect payment amount for final stage");
+        }
+
+        payable(contractor).transfer(msg.value);
     }
 
     function get_current_stage() public view returns (uint256) {

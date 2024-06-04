@@ -37,7 +37,4 @@ contract MarketPlace {
     function listing_lookup(uint256 _listing_id) public view returns (Listing) {
         return listings[_listing_id];
     }
-
-
-    
 }
