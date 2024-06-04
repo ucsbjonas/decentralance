@@ -51,7 +51,7 @@ contract UserFlowTest is Test {
 
     // 4a. contractor sends partial fufillment of listing
     vm.startBroadcast(contractor);
-    bool success = marketPlace.fufill_current_stage(listing_id);
+    bool success = marketPlace.fulfill_current_stage(listing_id);
     assertEq(success, true, "failed to fulfill current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should not move to next stage");
     vm.stopBroadcast();
@@ -65,7 +65,7 @@ contract UserFlowTest is Test {
 
     // 4b. contractor sends partial fuillfment of listing
     vm.startBroadcast(contractor);
-    bool success2 = marketPlace.fufill_current_stage(listing_id);
+    bool success2 = marketPlace.fulfill_current_stage(listing_id);
     assertEq(success2, true, "failed to fulfill current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "should not move to next stage");
     vm.stopBroadcast();
