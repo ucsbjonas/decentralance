@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 contract Listing {
     //storage variables
     address public client;
-    uint256[2] public amounts; //make it size 2 for now, not sure about workaround for dynammic sized arrays
+    uint256[2] public amounts; //make it size 2 for now, not sure about workaround for dynamic sized arrays
     uint256[2] public delivery_dates;
     string public description;
     address public contractor;
@@ -25,7 +25,6 @@ contract Listing {
 
     //functions
     function acceptListing(address _contractor) public {   
-        require(msg.sender == client, "only client can accept listing");
         require(!accepted, "listing already accepted");
         
         contractor = _contractor;
