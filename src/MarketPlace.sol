@@ -19,18 +19,24 @@ contract MarketPlace {
     }
 
     function acceptListing(uint256 listing_id) public {
-        return;
+        Listing listing = listings[listing_id];
+        listing.acceptListing(msg.sender);
     }
 
     function confirmListing(uint256 listing_id) public {
-        return;
+        Listing listing = listings[listing_id];
+        listing.fulfill_current_stage();
     }
 
     function fulfill_current_stage(uint256 listing_id) public returns (bool) {
+        Listing listing = listings[listing_id];
+        listing.fulfill_current_stage();
         return true;
     }
 
-    function pay_current_stage(uint256 listing_id) public returns (bool) {
+    function pay_current_stage(uint256 listing_id) public payable returns (bool) {
+        Listing listing = listings[listing_id];
+        listing.pay_current_stage{value: msg.value}();
         return true;
     }
 
