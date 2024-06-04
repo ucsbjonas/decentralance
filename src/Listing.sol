@@ -4,8 +4,9 @@ pragma solidity ^0.8.13;
 contract Listing {
     //storage variables
     address public client;
-    uint256[2] public amounts; //make it size 2 for now, not sure about workaround for dynamic sized arrays
-    uint256[2] public delivery_dates;
+    uint256[2] public amounts; // [totalAmount, partialAmount]
+    //make it size 2 for now, not sure about workaround for dynamic sized arrays
+    uint256[2] public delivery_dates; // [finalDeliveryDate, intermediateDeliveryDate]
     string public description;
     address public contractor;
     bool public accepted;
@@ -24,15 +25,18 @@ contract Listing {
     }
 
     //functions
-    function acceptListing(address _contractor) public {   
+    function acceptListing(address _contractor) public {
         require(!accepted, "listing already accepted");
-        
         contractor = _contractor;
         accepted = true;
-        return;
     }
 
     function fulfill_current_stage() public {
+        require(accepted, "listing not accepted yet");
+        require(!fulfilled, "listing already fulfilled");
+        require(msg.sender == contractor, "only contractor can fulfill");
+        require(curr_stage < 2, "all stages completed");
+        
         if (curr_stage == 0) {
             curr_stage = 1;
         } else if (curr_stage == 1) {
