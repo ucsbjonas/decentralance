@@ -33,7 +33,7 @@ contract UserFlowTest is Test {
     new_listing = new Listing(msg.sender, 
                             amounts,
                             delivery_dates,
-                            "a comission for you");
+                            "a commission for you");
     uint256 listing_id = marketPlace.addListing(new_listing);
     vm.stopBroadcast();
     // 2. contractor accepts listing and defines terms
