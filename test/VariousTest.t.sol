@@ -5,6 +5,8 @@ import {Test, console} from "forge-std/Test.sol";
 import {MarketPlace} from "../src/MarketPlace.sol";
 import {Listing} from "../src/Listing.sol";
 import "forge-std/Vm.sol";
+
+//all these tests are client initiiated (i.e. the client first creates the listing)
 contract VariousTest is Test{
 
     MarketPlace public marketPlace;
@@ -30,10 +32,11 @@ contract VariousTest is Test{
         delivery_dates.push(vm.getBlockTimestamp() + 250);
 
 
-        //struct contractor/client
+        // struct contractor/client should be added to MarketPlace.sol
         // address of the client/contractor  (address)
         // orders fufilled / fully payed for (int)
         // orders accepted and not fufilled / confirmed but not paid fully (past the deadline) (int)
+        // total amount of eth earned/paid for fully fulfilled/paid orders
 
         marketPlace.add_contractor(address(contractor));
         marketPlace.add_client(address(client));
@@ -65,6 +68,9 @@ contract VariousTest is Test{
         assertEq(client.balance() == 100 ether - 1 ether);
         assertEx(contractor.balance() == 100 ether + 1 ether);
         vm.stopBroadcast();
+
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
     //test not ontime delivery by the contractor
     function test_late_devliery() public{
@@ -75,6 +81,8 @@ contract VariousTest is Test{
         bool success = marketPlace.fulfill_current_stage(listing_id);
         vm.stopBroadcast(contractor);
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
     //test noontime payment by the client
@@ -91,6 +99,8 @@ contract VariousTest is Test{
         bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
     //test client can extend delivery date
@@ -107,7 +117,8 @@ contract VariousTest is Test{
         assertEq(success, true);
         vm.stopBroadcast();
 
-
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
     function test_overpayment() public{
 
@@ -121,6 +132,8 @@ contract VariousTest is Test{
         assertEx(contractor.balance() == 100 ether + 1 ether);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
     function test_underpayment() public {
 
@@ -133,6 +146,8 @@ contract VariousTest is Test{
         vm.expectRevert(CustomError.Insufficient_Fund);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
     //optional: client can make an initial downpayment
@@ -156,6 +171,8 @@ contract VariousTest is Test{
         bool success = marketPlace.fulfill_current_stage(listing_id);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
     function test_deletelisting_contractor() public {
@@ -174,6 +191,8 @@ contract VariousTest is Test{
         bool success = marketPlace.pay_current_stage{value: 100 ether}(listing_id);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
     //fufill track 1 spec
     function test_transferlisting_newclient() public {
@@ -183,6 +202,8 @@ contract VariousTest is Test{
         assertEq(marketPlace.listing_lookup(listing_id).client, new_client);
         vm.stopBroadcast();
 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
     //fufill track 1 spec
@@ -193,57 +214,141 @@ contract VariousTest is Test{
         assertEq(marketPlace.listing_lookup(listing_id).contractor, new_contractor);
         vm.stopBroadcast();
 
-
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
     function test_contractor_attributeupdate_fufill() public {
 
-        //go through a full cycle and increment orders fufilled
+        uint256 previous_count_fufilled = marketPlace.contractor_lookup(address(contractor)).fufilled_count;
+        uint256 previous_count_earned = marketPlace.contractor_lookup(address(contractor)).amount_earned;
+        //go through full user cycle
+        // contractor sends partial fufillment of listing and update the contractor's amount of orders fully fulfilled
+        vm.startBroadcast(contractor);
+        bool success = marketPlace.fulfill_current_stage(listing_id);
+        vm.stopBroadcast();
+        //client sends partial or full payment for (4)
+        vm.startBroadcast(client);
+        bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
+        vm.stopBroadcast();
+        //contractor sends partial fuillfment of listing
+        vm.startBroadcast(contractor);
+        bool success2 = marketPlace.fulfill_current_stage(listing_id);
+        vm.stopBroadcast();
+
+        // client DOES NOT pay for final stage
+        // vm.startBroadcast(client);
+        // bool success3 = marketPlace.pay_current_stage{value: 5 ether}(listing_id);
+        // vm.stopBroadcast();
+
+        //but since the contractor fufilled the listing completely, they get an increment
+        uint256 new_amount_fufilled = marketPlace.contractor_lookup(address(contractor)).fufilled_count;
+        uint256 new_amount_earned = marketPlace.contractor_lookup(address(contractor)).amount_earned;
+        assertEq(new_count_fufilled, previous_count_fufilled + 1);
+        assertEq(marketPlace.totalValue(listing_id), 6 ether);
+        assertEq(new_amount_earned, previous_amount_earned + 6 ether);
+
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
 
     }
     function test_client_attributeupdate_fullpayment() public {
 
+        uint256 previous_count_fullpay = marketPlace.client_lookup(address(contractor)).fullpay_count; 
+        uint256 previous_amount_paid = marketPlace.client_lookup(address(client)).total_paid;
         //go through a full cycle and increment orders fully paid
+        vm.startBroadcast(contractor);
+        bool success = marketPlace.fulfill_current_stage(listing_id);
+        vm.stopBroadcast();
+        vm.startBroadcast(client);
+        bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
+        vm.stopBroadcast();
+        //for this test, assume that the contractor has not fufilled the last stage
+        // vm.startBroadcast(contractor);
+        // bool success2 = marketPlace.fulfill_current_stage(listing_id);
+        // vm.stopBroadcast();
+        // client DOES pay for final stage
+        vm.startBroadcast(client);
+        bool success3 = marketPlace.pay_current_stage{value: 5 ether}(listing_id);
+        vm.stopBroadcast();
 
+        uint256 new_count_fullpay =  marketPlace.client_lookup(address(contractor)).fullpay_count; 
+        uint256 new_amount_paid = marketPlace.client_lookup(address(client)).total_paid;
+        assertEq(previous_count_fullpay, new_count_fullpay + 1);
+        assertEq(marketPlace.totalValue(listing_id), 6 ether);
+        assertEq(new_amount_paid, previous_amount_paid + 6 ether);
+
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
-
-    //test that only the one and only client associated with the listing can make certain calls
+    
+    //note that after setup the listing has already been accepted and confirmed so the following 2 tests make sense
+    //test that only the one and only client associated with the listing can make certain important function calls
     function test_wrong_client() public {
 
+        address rouge_client = address(0x99);
+        vm.startBroadcast(address(rogue_client));
+        vm.expectRevert(CustomError.Wrong_Client);
+        bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
+        vm.stopBroadcast();
 
-    //test that only the one and only client associated with the listing can make certain calls 
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
+
+    //test that only the one and only contractor associated with the listing can make certain imporant function calls 
     function test_wrong_contractor() public {
+        address rogue_contractor = address(0x999);
+        vm.startBroadcast(address(rogue_contractor));
+        vm.expectRevert(CustomError.Wrong_Contractor);
+        bool success = marketPlace.fulfill_current_stage(listing_id);
+        vm.stopBroadcast();
 
-
-
-    }
-    function test_no_ethtransfer_toMarketPlace () public {
-
-
-
-    }
-    function test_no_ethtransfer_Listing() public {
-
-
-
-    }
-    //test the last two specifications (the others are implied)
-    // Items purchased by a buyer can be put on sell again.
-    function test_cancel_listing() public{
-
-    }
-    // Within the same block, if one or more buyers pay for the same item, the one who pays more will eventually own it.
-    function test_same_block() public{
-
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
-    function test_reentrancy_fufill() public {
+    //ensure that only the marketplace contract can call function in listing.sol
+    function test_listing_caller_is_only_marketplace(){
+        address random_nobody = address(0x987654);
 
+        vm.startBroadcast(address(random_nobody));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.acceptListing(address(contractor));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.fulfill_current_stage();
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.pay_current_stage();
+        vm.stopBroadcast();
 
+        vm.startBroadcast(address(client));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.acceptListing(address(contractor));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.fulfill_current_stage();
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.pay_current_stage();
+        vm.stopBroadcast();
+
+        vm.startBroadcast(address(contractor));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.acceptListing(address(contractor));
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.fulfill_current_stage();
+        vm.expectRevert(CustomError.NotMarketPlace);
+        Listing.pay_current_stage();
+        vm.stopBroadcast();
+
+    test_no_ethtransfer_MarketPlace();
+    test_no_ethtransfer_Listing();
     }
 
-    function test_reentrancy_payment() public {
+    //attach these next 2 tests at the end of tests to ensure invariant that none of the .sol contracts should have an eth balance
+    function test_no_ethtransfer_MarketPlace() public { assertEq(marketPlace.balance(), 0);}
+    function test_no_ethtransfer_Listing() public { assertEq(marketPlace.balance(), 0);}
 
-        
-    }
 }
+
+
+
+
+
