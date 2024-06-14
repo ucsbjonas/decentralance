@@ -11,8 +11,12 @@ contract Listing {
     address public contractor;
     bool public accepted;
     bool public fulfilled;
+    bool public confirmed;
     uint256 public curr_stage; // 0 for not started, 1 for intermediate, 2 for final
+    bool public client_initiated;
 
+
+    error NotMarketPlace();
     //constructor
     constructor(address _client, uint256[] memory initial_amounts, uint256[] memory initial_delivery_dates, string memory initial_description) {
         client = _client;
