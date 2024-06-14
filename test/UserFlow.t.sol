@@ -6,6 +6,7 @@ import {MarketPlace} from "../src/MarketPlace.sol";
 import {Listing} from "../src/Listing.sol";
 import "forge-std/Vm.sol";
 
+//none of these tests should revert
 contract UserFlowTest is Test {
     MarketPlace public marketPlace;
     Listing public new_listing;
@@ -66,7 +67,7 @@ contract UserFlowTest is Test {
 
     // 5a. client sends partial or full payment for (4)
     vm.startBroadcast(client);
-    bool success1 = marketPlace.pay_current_stage(listing_id);
+    bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
     assertEq(success1, true, "failed to pay current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "did not move to next stage");
     vm.stopBroadcast();
@@ -80,7 +81,7 @@ contract UserFlowTest is Test {
 
     // 5b. client sends partial or full payment for (4)
     vm.startBroadcast(client);
-    bool success3 = marketPlace.pay_current_stage(listing_id);
+    bool success3 = marketPlace.pay_current_stage{value: 5 ether}(listing_id);
     assertEq(success3, true, "failed to pay current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 2, "did not move to next stage");
     assertEq(marketPlace.listing_lookup(listing_id).fulfilled(), true, "not fulfilled");
@@ -118,7 +119,7 @@ contract UserFlowTest is Test {
 
     // 4a. client sends partial payment of listing
     vm.startBroadcast(client);
-    bool success1 = marketPlace.pay_current_stage(listing_id);
+    bool success1 = marketPlace.pay_current_stage{value: 1 ether}(listing_id);
     assertEq(success1, true, "failed to pay current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 0, "should not move to next stage");
     vm.stopBroadcast();
@@ -132,7 +133,7 @@ contract UserFlowTest is Test {
 
     // 4b. client sends partial payment of listing
     vm.startBroadcast(client);
-    bool success3 = marketPlace.pay_current_stage(listing_id);
+    bool success3 = marketPlace.pay_current_stage{value: 5 ether}(listing_id);
     assertEq(success3, true, "failed to pay current stage");
     assertEq(marketPlace.listing_lookup(listing_id).curr_stage(), 1, "should not move to next stage");
     vm.stopBroadcast();
