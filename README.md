@@ -5,7 +5,7 @@
 ## Documentation
 
 Documentation can be found at `docs/src/src/Listing.sol/contract.Listing.md` and `docs/src/src/MarketPlace.sol/contract.MarketPlace.md`
-
+A typical user flow can be found in `tests/UserFlow.t.sol`
 
 Helpful foundry tools commands to run the project after cloning into this repository:
 ### Build
