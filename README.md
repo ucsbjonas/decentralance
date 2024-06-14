@@ -33,4 +33,4 @@ Client: user who pays the contractor for fufilling a listing
 ### Contracts
 There are two core contracts: `MarketPlace.sol` and `Listing.sol`. \
 `MarketPlace.sol` manages listings and keeps tracks of contractor and client profiles. \
-`Listing.sol` manages the state of the current listing and manages mutaation of current state of each listing.
+`Listing.sol` manages the state of the current listing and manages mutation of current state of each listing.
