@@ -15,10 +15,15 @@ contract Listing {
     uint256 public curr_stage; // 0 for not started, 1 for intermediate, 2 for final
     bool public client_initiated;
 
-
     error NotMarketPlace();
     //constructor
-    constructor(address _client, uint256[] memory initial_amounts, uint256[] memory initial_delivery_dates, string memory initial_description) {
+
+    constructor(
+        address _client,
+        uint256[] memory initial_amounts,
+        uint256[] memory initial_delivery_dates,
+        string memory initial_description
+    ) {
         client = _client;
         amounts = initial_amounts;
         delivery_dates = initial_delivery_dates;
@@ -40,7 +45,7 @@ contract Listing {
         require(!fulfilled, "listing already fulfilled");
         require(msg.sender == contractor, "only contractor can fulfill");
         require(curr_stage < 2, "all stages completed");
-        
+
         if (curr_stage == 0) {
             curr_stage = 1;
         } else if (curr_stage == 1) {

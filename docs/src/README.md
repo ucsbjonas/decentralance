@@ -27,6 +27,18 @@ $ forge build
 $ forge test
 ```
 
+### Test Coverage
+
+```shell
+$ forge coverage
+```
+
+### Documentation Generation
+
+```shell
+$ forge doc
+```
+
 ### Format
 
 ```shell
