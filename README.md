@@ -27,8 +27,8 @@ $ forge doc
 ## Overview
 ### Terminology
 Listing: a product of any type, especially those that are typically produced in freelance platforms \
-Contractor: user who fufills a listing (creates an end product for the client) \
-Client: user who pays the contractor for fufilling a listing 
+Contractor: user who fulfills a listing (creates an end product for the client) \
+Client: user who pays the contractor for fulfilling a listing 
  
 ### Contracts
 There are two core contracts: `MarketPlace.sol` and `Listing.sol`. \
